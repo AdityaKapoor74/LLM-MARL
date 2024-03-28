@@ -190,21 +190,7 @@ class Dstar:
 		end = goal
 
 		if self.map.map[goal.x][goal.y].state == "#":
-			# end_flag = False
-			# for x in [-1, 0, 1]:
-			# 	for y in [-1, 0, 1]:
-			# 		x_new = end.x+x
-			# 		y_new = end.y+y
-
-			# 		if x_new >= 0 and x_new < self.map.row and y_new >= 0 and y_new < self.map.col:
-			# 			if self.map.map[x_new][y_new].state != "#":
-			# 				end = self.map.map[x_new][y_new]
-			# 				print("End state type:", self.map.map[end.x][end.y].state)
-			# 				end_flag = True
-			# 				break
-			# 	if end_flag:
-			# 		break
-
+			
 			neighbors = self.map.get_neighbors(self.map.map[goal.x][goal.y])
 
 			for n in neighbors:
@@ -212,19 +198,33 @@ class Dstar:
 					end = n
 					break
 
-		print("Modified end state type and pose:", self.map.map[end.x][end.y].state, "(", end.x, end.y, ")")
+		# print("start (", start.x, start.y, ")")
+		# print("Modified end state type and pose:", end.state, "(", end.x, end.y, ")")
+		
+		# try_4 = 0
+		states = []
 
 		while tmp != end:
+			# print("parent xy", tmp.parent.x, tmp.parent.y)
 			tmp.set_state("*")
-			rx.append(tmp.x)
-			ry.append(tmp.y)
+
 			if show_animation:
 				plt.plot(rx, ry, "-r")
 				plt.pause(0.01)
 			if tmp.parent.state == "#":
 				# print("HERE", tmp.x, tmp.y)
 				self.modify(tmp)
+				# try_4 += 1
+				# if try_4 == 4:
+				# 	break
 				continue
+
+			rx.append(tmp.x)
+			ry.append(tmp.y)
+
+			# print("rx", rx)
+			# print("ry", ry)
+
 			tmp = tmp.parent
 		
 		tmp.set_state("e")
