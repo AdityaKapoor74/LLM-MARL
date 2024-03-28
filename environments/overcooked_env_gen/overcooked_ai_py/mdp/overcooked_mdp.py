@@ -948,7 +948,7 @@ class OvercookedGridworld(object):
             self._move_if_direction(p.position, p.orientation, a) \
             for p, a in zip(old_player_states, joint_action)]))
         old_positions = tuple(p.position for p in old_player_states)
-        new_positions = self._handle_collisions(old_positions, new_positions)
+        # new_positions = self._handle_collisions(old_positions, new_positions) # COMMENTED THIS BECAUSE WE WANT CHEFS TO GO PAST EACH OTHER
         return new_positions, new_orientations
 
     def is_transition_collision(self, old_positions, new_positions):
@@ -1073,6 +1073,35 @@ class OvercookedGridworld(object):
 
     def get_counter_locations(self):
         return list(self.terrain_pos_dict['X'])
+
+    def get_accessible_counter_locations(self):
+        counter_locations = list(self.terrain_pos_dict['X'])
+        final_counter_locations = []
+        '''
+        X -> counter locations
+        P -> pot locations
+        S -> serving locations
+        O -> onion dispenser locations
+        T -> tomato dispenser locations
+        D -> dish dispenser locations
+        '''
+        for cl in counter_locations:
+            flag_surrounded = False
+            # check neighbors
+            for i, j in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                new_x = cl[0] + i
+                new_y = cl[1] + j
+                if new_x >= 0 and new_x < self.height and new_y >= 0 and new_y < self.width:
+                    if self.terrain_mtx[new_x][new_y] in ["X", "P", "S", "O", "T", "D"]:
+                        flag_surrounded = True
+                        break
+                        
+            if not flag_surrounded:
+                final_counter_locations.append(cl)
+
+        return final_counter_locations
+
+
 
     @property
     def num_pots(self):
@@ -1302,7 +1331,7 @@ class OvercookedGridworld(object):
         """
         NOTE: this only works if self.num_players == 2
         Useful if:
-        - Pot is ready/cooking and there is no player with a dish               \ 
+        - Pot is ready/cooking and there is no player with a dish               \
         - 2 pots are ready/cooking and there is one player with a dish          | -> number of dishes in players hands < number of ready/cooking/partially full soups
         - Partially full pot is ok if the other player is on course to fill it  /
 
@@ -1516,13 +1545,13 @@ class OvercookedGridworld(object):
         for pos, player in players_dict.items():
             x, y = pos
             curr_pos = get_curr_pos(x, y, mode)
-
+            
             # check player position conflicts
             player_idx_lst = [
                 i for i, p in enumerate(state.players)
                 if p.position == player.position
             ]
-            assert len(player_idx_lst) == 1
+            # assert len(player_idx_lst) == 1
 
             player_pgobj, player_hat_pgobj = get_player_sprite(
                 player, player_idx_lst[0])
